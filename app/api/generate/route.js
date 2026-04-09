@@ -6,12 +6,14 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
 const SYSTEM_PROMPT = `You are an elite SEO content strategist and casino review expert for the South African online gambling market. You write for Novus Media.
 
-Write a COMPREHENSIVE 3,500–4,000-word SEO-optimised casino review in Markdown. Short reviews under 3,000 words are unacceptable — Google rewards depth for review-intent queries and your competitors are publishing 3,500–4,000 word pieces.
+Write a CONCISE but comprehensive 3,500-word SEO-optimised casino review in Markdown. Target exactly 3,500 words. Do not pad. Every sentence must add value. Complete all sections fully before stopping.
+
+CRITICAL: You must ONLY use the information provided to you in the source content below. Do not invent figures, do not use prior knowledge, do not guess. If a specific piece of information is not in the provided source content, say "not specified" or omit that detail. Accuracy is more important than completeness.
 
 WRITING RULES:
-1. The casino's OWN WEBSITE is the PRIMARY SOURCE OF TRUTH — search it first for current promotions, bonuses, deposit methods, licensing, T&Cs, odds, game library.
-2. Secondary sources (onlinemobileslots.com, goal.com/en-za/betting) provide supplementary review context only.
-3. Weave in South African sports betting SEO keywords naturally throughout — never keyword-stuff.
+1. ONLY use facts, figures, and details from the source content provided. Nothing else.
+2. The casino's OWN WEBSITE content is the PRIMARY SOURCE OF TRUTH — prioritise it for bonuses, deposit methods, game counts, licensing, T&Cs.
+3. Secondary sources provide supplementary review context only.
 4. Use H2 headings phrased as questions that match user search intent (e.g. "What Welcome Bonus Does Easybet Offer?" not "Welcome Bonus"). H3s are clean navigational labels.
 5. Open with: <!-- SEO META: Focus Keyphrase | Meta Description max 155 chars | Suggested Slug -->
 6. All currency in ZAR (R). All odds in decimal format.
@@ -19,7 +21,7 @@ WRITING RULES:
 8. No references to any specific review site or domain in the output.
 9. End with a responsible gambling section.
 
-REQUIRED SECTIONS — each must be substantive (200–400 words minimum for major sections):
+REQUIRED SECTIONS — complete every section, no cutting off mid-review:
 
 <!-- SEO META block -->
 
@@ -30,107 +32,71 @@ REQUIRED SECTIONS — each must be substantive (200–400 words minimum for majo
 (3–4 sentence summary. Star rating. Who should sign up, who shouldn't.)
 
 ## What Welcome Bonus Does [Casino] Offer South African Players?
-- Exact bonus amount, match %, minimum deposit in ZAR
-- WAGERING REQUIREMENTS: spell out the multiplier, give a worked rand example (e.g. "Deposit R500, get R500 bonus = R1,000 to wager 30x = R30,000 turnover required")
-- Eligible games and contribution %s (slots vs table games vs sports)
+- Exact bonus amount, match %, minimum deposit in ZAR (from source only)
+- WAGERING REQUIREMENTS: spell out the multiplier, give a worked rand example
+- Eligible games and contribution %s
 - Bonus expiry date
 - Max bet per spin/round while bonus is active
-- Any other current promos (reload, cashback, free spins, refer-a-friend)
+- Any other current promos
 
 ## How Does [Casino]'s Sports Betting Compare to Rivals?
 - Sports and leagues covered (focus on PSL, Premiership, cricket, rugby)
-- Number of markets per PSL match (e.g. 50+ or 200+ markets?)
-- Odds comparison: give 3–4 example odds vs Betway and Hollywoodbets on same market
-- Live/in-play betting availability and quality
-- Cash-out feature — is it available, partial cash-out?
-- Bet builder / same-game multi feature?
+- Markets depth per match (from source only)
+- Live/in-play betting availability
+- Cash-out feature
+- Bet builder feature
 - Streaming availability
 
 ## What Casino Games Are Available on [Casino]?
-- Total game count and main categories
-- Key software providers (Pragmatic Play, Evolution, NetEnt, etc.)
-- RTP figures on 3–5 popular slots (e.g. Gates of Olympus 96.5%, Book of Dead 96.21%)
-- Progressive jackpot slots — current/typical jackpot sizes if available
-- Live casino: tables, game shows, baccarat, blackjack variants
-- Game search, filter, and navigation experience — is it easy to find games?
-- Any exclusive titles?
+- Total game count and categories (from source only — do not guess)
+- Key software providers
+- Popular slots mentioned in sources with RTP if available
+- Live casino offering
+- Game navigation experience
 
 ## How Do You Deposit and Withdraw at [Casino]?
-Cover each method individually:
-- Instant EFT / Ozow: step-by-step process, limits, fees
-- Credit/debit card: limits, processing time
-- Bank transfer: which banks, how long
-- Crypto (if available): which coins, process
-- Any e-wallets (PayFlex, etc.)
-For each: minimum deposit, minimum withdrawal, processing time, any fees.
-Overall: how fast are withdrawals really? FICA verification process explained.
+Cover each method listed on the casino site:
+- Method name, minimum deposit, minimum withdrawal, processing time, fees
+- FICA verification process
 
 ## How Do You Register an Account at [Casino]?
-Step-by-step sign-up walkthrough:
-1. Step one (click register / create account)
-2. Personal details required (name, ID number, DOB)
-3. FICA document upload — what's needed (ID, proof of address)
-4. Age verification
-5. Responsible gambling limits setup during registration
-6. First login and lobby experience
-Estimated time from registration to first bet.
+Step-by-step sign-up walkthrough based on source content.
 
 ## What Is [Casino]'s Mobile Experience Like?
-- Dedicated iOS app and/or Android app? Or mobile web only?
-- App store rating (check Apple App Store / Google Play — include rating if available)
-- Key features available on mobile vs desktop
-- Page load speed, any known issues or complaints
-- Screenshot walkthrough description (lobby, bet slip, casino lobby)
-- Data usage / lite mode if available
+- App availability (iOS/Android) or mobile web
+- App store rating if mentioned in sources
+- Key mobile features
 
 ## Does [Casino] Have a VIP or Loyalty Programme?
-- Does a loyalty/VIP programme exist?
-- How do you qualify? Points system?
-- Tiers and benefits at each level
-- Cashback, faster withdrawals, dedicated manager?
-- If no programme exists, note this clearly and compare to competitors who do
+- Details from source only. If not mentioned, state clearly it could not be confirmed.
 
 ## How Does [Casino] Compare to Betway and Hollywoodbets?
-Comparison table + narrative covering:
-| Feature | [Casino] | Betway SA | Hollywoodbets |
-| Welcome Bonus | | | |
-| Sports Markets | | | |
-| Casino Games | | | |
-| Mobile App | | | |
-| Withdrawal Speed | | | |
-| Loyalty Programme | | | |
-Narrative: who wins each category and overall recommendation.
+Comparison table + narrative. Only use facts confirmed in sources for [Casino] — use general knowledge only for Betway/Hollywoodbets columns.
 
 ## Is [Casino] Safe and Legal in South Africa?
-- Licensing body (Western Cape Gambling Board, etc.) and licence number
-- Responsible gambling tools (deposit limits, session limits, self-exclusion)
-- SSL encryption and data protection
-- Affiliation with RGSB or similar
+- Licensing details from source only
+- Responsible gambling tools
 
 ## How Good Is [Casino]'s Customer Support?
-- Channels: live chat, email, phone, WhatsApp?
-- Hours of operation (24/7 or limited?)
-- Response time experience
-- Languages supported (Zulu, Afrikaans, etc.?)
-- Quality of FAQ/help centre
+- Channels, hours, languages from source only
 
 ## Pros and Cons
-(Use a proper markdown table, not bullet lists)
+(Markdown table)
 
 ## Final Verdict — Should South African Players Sign Up?
-(200+ word conclusion. Summarise the key reasons to join or avoid. Final rating /5 with brief justification per category: Sports Betting, Casino, Bonuses, Mobile, Banking, Support.)
+(Conclusion. Final rating /5.)
 
 ## Frequently Asked Questions
-(Minimum 6 questions. Format: **Q: Question?** followed by a direct answer paragraph. Questions should match real search queries SA players type.)
+(Minimum 6 questions. Format: **Q: Question?** followed by answer. Based only on sourced facts.)
 
 ## Responsible Gambling
-(Standard responsible gambling section. Include RGSB, NCPGambling, Gamblers Anonymous SA contact details.)
+(Include RGSB, NCPGambling, Gamblers Anonymous SA contact details.)
 
 SEO REQUIREMENTS:
-- 1.5–2% primary keyword density (e.g. "[Casino] review South Africa")
-- LSI keywords throughout: "online casino ZAR", "SA betting sites", "FICA casino", "Springboks betting", "PSL betting"
+- 1.5–2% primary keyword density
+- LSI keywords: "online casino ZAR", "SA betting sites", "FICA casino", "Springboks betting", "PSL betting"
 - Internal links marked as [INTERNAL LINK: suggested topic]
-- Front matter block at top (YAML):
+- YAML front matter at top:
 ---
 title: "[Casino] Review South Africa 2026"
 description: "..."
@@ -153,6 +119,31 @@ const SA_KEYWORDS = [
   "Springboks betting odds",
 ];
 
+async function fetchPageContent(url) {
+  try {
+    const res = await fetch(url, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (compatible; ReviewBot/1.0)",
+        "Accept": "text/html,application/xhtml+xml",
+      },
+      signal: AbortSignal.timeout(15000),
+    });
+    if (!res.ok) return `[Could not fetch ${url} — status ${res.status}]`;
+    const html = await res.text();
+    // Strip HTML tags and collapse whitespace
+    const text = html
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<[^>]+>/g, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+    // Return first 8000 chars to stay within token limits
+    return text.slice(0, 8000);
+  } catch (err) {
+    return `[Could not fetch ${url} — ${err.message}]`;
+  }
+}
+
 export async function POST(req) {
   try {
     const { casino, sources } = await req.json();
@@ -160,35 +151,50 @@ export async function POST(req) {
       return Response.json({ error: "Missing casino name or domain" }, { status: 400 });
     }
 
-    const sourcesText = (sources || [])
-      .map((s, i) => `${i + 2}. [SECONDARY] ${s.url} — search for ${casino.name} review content`)
+    // Fetch all sources in parallel
+    const casinoUrl = `https://${casino.domain}`;
+    const sourceUrls = [casinoUrl, ...(sources || []).map(s => s.url)];
+
+    const fetchedContents = await Promise.all(
+      sourceUrls.map(async (url) => {
+        const content = await fetchPageContent(url);
+        return { url, content };
+      })
+    );
+
+    // Build source content block for the prompt
+    const sourceBlock = fetchedContents
+      .map(({ url, content }, i) => {
+        const label = i === 0 ? "PRIMARY SOURCE (casino's own website)" : `SECONDARY SOURCE ${i}`;
+        return `=== ${label}: ${url} ===\n${content}\n`;
+      })
       .join("\n");
 
-    const userPrompt = `Research and write a 3,500–4,000-word SEO casino review for ${casino.name} (${casino.domain}) targeting South African bettors in 2026.
+    const userPrompt = `Write a 3,500-word SEO casino review for ${casino.name} targeting South African bettors in 2026.
 
-SOURCES — search in this priority order:
-1. [PRIMARY] https://${casino.domain} — scrape current bonuses, deposit methods, game library, odds, T&Cs, licence info
-${sourcesText}
+IMPORTANT: Base the ENTIRE review ONLY on the source content provided below. Do not use any external knowledge or invented figures. If information is not in the sources, do not include it or mark it as "not confirmed".
 
 SA SEO KEYWORDS TO WEAVE IN NATURALLY:
 ${SA_KEYWORDS.map((k) => `- ${k}`).join("\n")}
 
 CRITICAL REMINDERS:
-- Target word count: 3,500–4,000 words. Do NOT stop early.
-- Every required section must be present and substantive.
-- Bonus wagering section MUST include a worked ZAR example.
-- Sports betting section MUST include odds comparison vs Betway and Hollywoodbets.
-- Banking section MUST cover each payment method individually with limits and processing times.
-- Include the step-by-step registration walkthrough.
-- Include VIP/loyalty programme section (even if to say none exists).
-- Include the competitor comparison table.
-- Minimum 6 FAQ questions targeting real SA search queries.`;
+- Exactly 3,500 words. Complete ALL sections. Do not stop early.
+- Every fact must come from the source content below.
+- Bonus wagering section MUST include a worked ZAR example (if bonus details are in sources).
+- Sports betting section MUST reference actual markets/sports found in sources.
+- Banking section MUST list only payment methods confirmed in sources.
+- Minimum 6 FAQ questions.
+
+--- SOURCE CONTENT START ---
+
+${sourceBlock}
+
+--- SOURCE CONTENT END ---`;
 
     const stream = client.messages.stream({
       model: "claude-sonnet-4-5",
-      max_tokens: 8000,
+      max_tokens: 16000,
       system: SYSTEM_PROMPT,
-      tools: [{ type: "web_search_20250305", name: "web_search" }],
       messages: [{ role: "user", content: userPrompt }],
     });
 
