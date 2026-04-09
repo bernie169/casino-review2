@@ -185,7 +185,7 @@ CRITICAL REMINDERS:
 - Minimum 6 FAQ questions targeting real SA search queries.`;
 
     const stream = client.messages.stream({
-      model: "claude-opus-4-5-20251101",
+      model: "claude-opus-4-5",
       max_tokens: 8000,
       system: SYSTEM_PROMPT,
       tools: [{ type: "web_search_20250305", name: "web_search" }],
