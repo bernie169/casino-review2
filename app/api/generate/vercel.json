@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "app/api/generate/route.js": {
+      "maxDuration": 300
+    }
+  },
+  "regions": ["cpt1"]
+}
