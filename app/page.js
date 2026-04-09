@@ -75,7 +75,7 @@ export default function Home() {
 
       if (!res.ok) {
         const err = await res.json();
-        addLog(err.error || `Server error ${res.}`, "error");
+        addLog(err.error || `Server error ${res.status}`, "error");
         setBusy(false);
         return;
       }
@@ -91,14 +91,14 @@ export default function Home() {
 
         buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split("\n");
-        buffer = lines.pop(); // keep incomplete line
+        buffer = lines.pop();
 
         for (const line of lines) {
           if (!line.startsWith("data: ")) continue;
           try {
             const event = JSON.parse(line.slice(6));
 
-           if (event.type === "chunk") {
+            if (event.type === "chunk") {
               setMarkdown(prev => {
                 const updated = prev + event.text;
                 const wc = updated.trim().split(/\s+/).length;
@@ -233,7 +233,7 @@ export default function Home() {
                     <div className="bc" style={{ fontSize: 12, color: "#8b949e", fontWeight: 700, letterSpacing: ".07em", textTransform: "uppercase" }}>Ready to generate</div>
                     <div style={{ fontSize: 14, color: "#e6edf3", marginTop: 3 }}>
                       <span style={{ color: "#e8ff00", fontWeight: 600 }}>{selected.name}</span>
-                      {" · "}{selected.domain}{" · "}{sources.length + 1} sources · ~3000 words
+                      {" · "}{selected.domain}{" · "}{sources.length + 1} sources · ~3500-4000 words
                     </div>
                   </>
                 ) : (
