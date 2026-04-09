@@ -9,12 +9,12 @@ const SYSTEM_PROMPT = `You are an elite SEO content strategist and casino review
 Write a CONCISE but comprehensive 3,500-word SEO-optimised casino review in Markdown. Target exactly 3,500 words. Do not pad. Every sentence must add value. Complete all sections fully before stopping.
 
 CRITICAL ACCURACY RULES — NON-NEGOTIABLE:
-1. ONLY use facts, figures, and details from the casino's own website content provided. Nothing else.
-2. Do NOT invent figures, game counts, RTP percentages, or bonus amounts. If not in the source, say "not specified" or omit.
+1. ONLY use facts, figures, and details from the casino website content provided below. Nothing else.
+2. Do NOT invent figures, game counts, RTP percentages, or bonus amounts. If not in the source content, say "not specified" or omit.
 3. NEVER reference, mention, or link to any competing casino, betting site, review site, or third-party source. The only site referenced in the review is the casino being reviewed.
-4. NEVER include bonus codes, promo codes, or promotional offers sourced from anywhere other than the casino's own website content provided.
+4. NEVER include bonus codes, promo codes, or promotional offers not found in the provided casino content.
 5. NEVER mention goal.com, onlinemobileslots.com, or any other external site anywhere in the review.
-6. If a fact cannot be confirmed from the casino's own website content, do not include it.
+6. If a fact cannot be confirmed from the provided content, do not include it.
 
 WRITING RULES:
 1. Use H2 headings phrased as questions matching user search intent (e.g. "What Welcome Bonus Does Easybet Offer?"). H3s are clean navigational labels.
@@ -32,7 +32,7 @@ REQUIRED SECTIONS — complete every section, do not cut off mid-review:
 ## What Casino Games Are Available on [Casino]?
 ## How Do You Deposit and Withdraw at [Casino]?
 ## How Do You Register an Account at [Casino]?
-## What Is [Casino] Mobile Experience Like?
+## What Is the [Casino] Mobile Experience Like?
 ## Does [Casino] Have a VIP or Loyalty Programme?
 ## How Does [Casino] Stack Up for South African Players?
 ## Is [Casino] Safe and Legal in South Africa?
@@ -59,16 +59,29 @@ const SA_KEYWORDS = [
   "Springboks betting odds",
 ];
 
-async function fetchPageContent(url) {
+// Subpage slugs most likely to contain useful review content
+const PRIORITY_SLUGS = [
+  "/promotions", "/bonus", "/welcome-bonus", "/offers",
+  "/casino", "/slots", "/live-casino", "/games",
+  "/sport", "/sports", "/sports-betting", "/soccer", "/football",
+  "/banking", "/deposits", "/withdrawals", "/payments",
+  "/mobile", "/app", "/mobile-app",
+  "/about", "/about-us", "/responsible-gambling", "/licensing",
+  "/vip", "/loyalty", "/rewards",
+  "/register", "/sign-up", "/contact", "/support", "/help",
+];
+
+async function fetchPage(url) {
   try {
     const res = await fetch(url, {
       headers: {
-        "User-Agent": "Mozilla/5.0 (compatible; ReviewBot/1.0)",
-        "Accept": "text/html,application/xhtml+xml",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Language": "en-ZA,en;q=0.9",
       },
-      signal: AbortSignal.timeout(15000),
+      signal: AbortSignal.timeout(10000),
     });
-    if (!res.ok) return `[Could not fetch ${url} - status ${res.status}]`;
+    if (!res.ok) return null;
     const html = await res.text();
     const text = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
@@ -76,10 +89,93 @@ async function fetchPageContent(url) {
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-    return text.slice(0, 12000);
-  } catch (err) {
-    return `[Could not fetch ${url} - ${err.message}]`;
+    return text.length > 100 ? text.slice(0, 5000) : null;
+  } catch {
+    return null;
   }
+}
+
+function extractInternalLinks(html, baseUrl) {
+  const links = new Set();
+  const hrefRegex = /href=["']([^"']+)["']/gi;
+  let match;
+  while ((match = hrefRegex.exec(html)) !== null) {
+    const href = match[1];
+    try {
+      const url = new URL(href, baseUrl);
+      if (url.hostname === new URL(baseUrl).hostname && url.pathname !== "/") {
+        links.add(url.pathname);
+      }
+    } catch {}
+  }
+  return [...links];
+}
+
+async function scrapesite(domain) {
+  const baseUrl = `https://${domain}`;
+  const pages = {};
+
+  // Fetch homepage and extract links
+  let homepageHtml = "";
+  try {
+    const res = await fetch(baseUrl, {
+      headers: {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml",
+        "Accept-Language": "en-ZA,en;q=0.9",
+      },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (res.ok) {
+      homepageHtml = await res.text();
+      const text = homepageHtml
+        .replace(/<script[\s\S]*?<\/script>/gi, "")
+        .replace(/<style[\s\S]*?<\/style>/gi, "")
+        .replace(/<[^>]+>/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+      if (text.length > 100) pages["homepage"] = text.slice(0, 5000);
+    }
+  } catch {}
+
+  // Extract internal links from homepage
+  const internalLinks = extractInternalLinks(homepageHtml, baseUrl);
+
+  // Score links by how many priority slugs they match
+  const scoredLinks = internalLinks.map(path => {
+    const score = PRIORITY_SLUGS.filter(slug =>
+      path.toLowerCase().includes(slug.replace("/", ""))
+    ).length;
+    return { path, score };
+  }).filter(l => l.score > 0).sort((a, b) => b.score - a.score);
+
+  // Also try all priority slugs directly
+  const directSlugs = PRIORITY_SLUGS.map(slug => ({ path: slug, score: 1 }));
+
+  // Combine, deduplicate, take top 15
+  const allPaths = [...scoredLinks, ...directSlugs];
+  const seen = new Set();
+  const toFetch = [];
+  for (const { path } of allPaths) {
+    if (!seen.has(path) && toFetch.length < 15) {
+      seen.add(path);
+      toFetch.push(path);
+    }
+  }
+
+  // Fetch all subpages in parallel
+  const results = await Promise.all(
+    toFetch.map(async (path) => {
+      const content = await fetchPage(`${baseUrl}${path}`);
+      return { path, content };
+    })
+  );
+
+  for (const { path, content } of results) {
+    if (content) pages[path] = content;
+  }
+
+  return pages;
 }
 
 export async function POST(req) {
@@ -89,12 +185,18 @@ export async function POST(req) {
       return Response.json({ error: "Missing casino name or domain" }, { status: 400 });
     }
 
-    const casinoUrl = `https://${casino.domain}`;
-    const casinoContent = await fetchPageContent(casinoUrl);
+    // Scrape all relevant pages from the casino site
+    const pages = await scrapesite(casino.domain);
+    const pageCount = Object.keys(pages).length;
 
-    const userPrompt = `Write a 3,500-word SEO casino review for ${casino.name} targeting South African bettors in 2026.
+    // Build content block
+    const contentBlock = Object.entries(pages)
+      .map(([path, content]) => `=== PAGE: ${path} ===\n${content}`)
+      .join("\n\n");
 
-IMPORTANT: Base the ENTIRE review ONLY on the casino website content provided below. Do not use any external knowledge, invented figures, or information from any other source. If something is not in the content below, do not include it.
+    const userPrompt = `Write a 3,500-word SEO casino review for ${casino.name} (${casino.domain}) targeting South African bettors in 2026.
+
+IMPORTANT: Base the ENTIRE review ONLY on the casino website content provided below (scraped from ${pageCount} pages of ${casino.domain}). Do not use any external knowledge or invented figures. If something is not in the content below, do not include it.
 
 SA SEO KEYWORDS TO WEAVE IN NATURALLY:
 ${SA_KEYWORDS.map((k) => `- ${k}`).join("\n")}
@@ -103,12 +205,12 @@ CRITICAL REMINDERS:
 - Exactly 3,500 words. Complete ALL sections. Do not stop early.
 - Only use facts confirmed in the source content below.
 - Never mention or reference any competing site, review site, or third-party platform.
-- Never include bonus or promo codes not explicitly stated on the casino's own site.
+- Never include bonus or promo codes not found in the content below.
 - Minimum 6 FAQ questions based only on sourced facts.
 
---- CASINO WEBSITE CONTENT (${casinoUrl}) ---
+--- CASINO WEBSITE CONTENT (${pageCount} pages scraped from ${casino.domain}) ---
 
-${casinoContent}
+${contentBlock}
 
 --- END OF SOURCE CONTENT ---`;
 
