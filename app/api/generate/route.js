@@ -8,101 +8,41 @@ const SYSTEM_PROMPT = `You are an elite SEO content strategist and casino review
 
 Write a CONCISE but comprehensive 3,500-word SEO-optimised casino review in Markdown. Target exactly 3,500 words. Do not pad. Every sentence must add value. Complete all sections fully before stopping.
 
-CRITICAL: You must ONLY use the information provided to you in the source content below. Do not invent figures, do not use prior knowledge, do not guess. If a specific piece of information is not in the provided source content, say "not specified" or omit that detail. Accuracy is more important than completeness.
+CRITICAL ACCURACY RULES — NON-NEGOTIABLE:
+1. ONLY use facts, figures, and details from the casino's own website content provided. Nothing else.
+2. Do NOT invent figures, game counts, RTP percentages, or bonus amounts. If not in the source, say "not specified" or omit.
+3. NEVER reference, mention, or link to any competing casino, betting site, review site, or third-party source. The only site referenced in the review is the casino being reviewed.
+4. NEVER include bonus codes, promo codes, or promotional offers sourced from anywhere other than the casino's own website content provided.
+5. NEVER mention goal.com, onlinemobileslots.com, or any other external site anywhere in the review.
+6. If a fact cannot be confirmed from the casino's own website content, do not include it.
 
 WRITING RULES:
-1. ONLY use facts, figures, and details from the source content provided. Nothing else.
-2. The casino's OWN WEBSITE content is the PRIMARY SOURCE OF TRUTH — prioritise it for bonuses, deposit methods, game counts, licensing, T&Cs.
-3. Secondary sources provide supplementary review context only.
-4. Use H2 headings phrased as questions that match user search intent (e.g. "What Welcome Bonus Does Easybet Offer?" not "Welcome Bonus"). H3s are clean navigational labels.
-5. Open with: <!-- SEO META: Focus Keyphrase | Meta Description max 155 chars | Suggested Slug -->
-6. All currency in ZAR (R). All odds in decimal format.
-7. Humanised, authoritative tone for South African bettors — no puffery, no rule-of-three lists, no em dashes.
-8. No references to any specific review site or domain in the output.
-9. End with a responsible gambling section.
+1. Use H2 headings phrased as questions matching user search intent (e.g. "What Welcome Bonus Does Easybet Offer?"). H3s are clean navigational labels.
+2. Open with: <!-- SEO META: Focus Keyphrase | Meta Description max 155 chars | Suggested Slug -->
+3. All currency in ZAR (R). All odds in decimal format.
+4. Humanised, authoritative tone for South African bettors — no puffery, no rule-of-three lists, no em dashes.
+5. End with a responsible gambling section.
 
-REQUIRED SECTIONS — complete every section, no cutting off mid-review:
+REQUIRED SECTIONS — complete every section, do not cut off mid-review:
 
-<!-- SEO META block -->
-
-# [Casino] Review South Africa 2026 – Is It Worth Your Rands?
-(Opening paragraph: quick verdict, who it suits, overall star rating /5)
-
+# [Casino] Review South Africa 2026
 ## Quick Verdict
-(3–4 sentence summary. Star rating. Who should sign up, who shouldn't.)
-
 ## What Welcome Bonus Does [Casino] Offer South African Players?
-- Exact bonus amount, match %, minimum deposit in ZAR (from source only)
-- WAGERING REQUIREMENTS: spell out the multiplier, give a worked rand example
-- Eligible games and contribution %s
-- Bonus expiry date
-- Max bet per spin/round while bonus is active
-- Any other current promos
-
-## How Does [Casino]'s Sports Betting Compare to Rivals?
-- Sports and leagues covered (focus on PSL, Premiership, cricket, rugby)
-- Markets depth per match (from source only)
-- Live/in-play betting availability
-- Cash-out feature
-- Bet builder feature
-- Streaming availability
-
+## How Does [Casino] Sports Betting Work?
 ## What Casino Games Are Available on [Casino]?
-- Total game count and categories (from source only — do not guess)
-- Key software providers
-- Popular slots mentioned in sources with RTP if available
-- Live casino offering
-- Game navigation experience
-
 ## How Do You Deposit and Withdraw at [Casino]?
-Cover each method listed on the casino site:
-- Method name, minimum deposit, minimum withdrawal, processing time, fees
-- FICA verification process
-
 ## How Do You Register an Account at [Casino]?
-Step-by-step sign-up walkthrough based on source content.
-
-## What Is [Casino]'s Mobile Experience Like?
-- App availability (iOS/Android) or mobile web
-- App store rating if mentioned in sources
-- Key mobile features
-
+## What Is [Casino] Mobile Experience Like?
 ## Does [Casino] Have a VIP or Loyalty Programme?
-- Details from source only. If not mentioned, state clearly it could not be confirmed.
-
-## How Does [Casino] Compare to Betway and Hollywoodbets?
-Comparison table + narrative. Only use facts confirmed in sources for [Casino] — use general knowledge only for Betway/Hollywoodbets columns.
-
+## How Does [Casino] Stack Up for South African Players?
 ## Is [Casino] Safe and Legal in South Africa?
-- Licensing details from source only
-- Responsible gambling tools
-
-## How Good Is [Casino]'s Customer Support?
-- Channels, hours, languages from source only
-
+## How Good Is [Casino] Customer Support?
 ## Pros and Cons
-(Markdown table)
-
-## Final Verdict — Should South African Players Sign Up?
-(Conclusion. Final rating /5.)
-
+## Final Verdict
 ## Frequently Asked Questions
-(Minimum 6 questions. Format: **Q: Question?** followed by answer. Based only on sourced facts.)
-
 ## Responsible Gambling
-(Include RGSB, NCPGambling, Gamblers Anonymous SA contact details.)
 
-SEO REQUIREMENTS:
-- 1.5–2% primary keyword density
-- LSI keywords: "online casino ZAR", "SA betting sites", "FICA casino", "Springboks betting", "PSL betting"
-- Internal links marked as [INTERNAL LINK: suggested topic]
-- YAML front matter at top:
----
-title: "[Casino] Review South Africa 2026"
-description: "..."
-tags: [online casino, South Africa, sports betting, ZAR]
-canonical: "/reviews/[slug]"
----`;
+SEO: 1.5-2% keyword density, LSI keywords throughout, internal links as [INTERNAL LINK: topic], YAML front matter at top.`;
 
 const SA_KEYWORDS = [
   "best online casino South Africa",
@@ -128,68 +68,49 @@ async function fetchPageContent(url) {
       },
       signal: AbortSignal.timeout(15000),
     });
-    if (!res.ok) return `[Could not fetch ${url} — status ${res.status}]`;
+    if (!res.ok) return `[Could not fetch ${url} - status ${res.status}]`;
     const html = await res.text();
-    // Strip HTML tags and collapse whitespace
     const text = html
       .replace(/<script[\s\S]*?<\/script>/gi, "")
       .replace(/<style[\s\S]*?<\/style>/gi, "")
       .replace(/<[^>]+>/g, " ")
       .replace(/\s+/g, " ")
       .trim();
-    // Return first 8000 chars to stay within token limits
-    return text.slice(0, 8000);
+    return text.slice(0, 12000);
   } catch (err) {
-    return `[Could not fetch ${url} — ${err.message}]`;
+    return `[Could not fetch ${url} - ${err.message}]`;
   }
 }
 
 export async function POST(req) {
   try {
-    const { casino, sources } = await req.json();
+    const { casino } = await req.json();
     if (!casino?.name || !casino?.domain) {
       return Response.json({ error: "Missing casino name or domain" }, { status: 400 });
     }
 
-    // Fetch all sources in parallel
     const casinoUrl = `https://${casino.domain}`;
-    const sourceUrls = [casinoUrl, ...(sources || []).map(s => s.url)];
-
-    const fetchedContents = await Promise.all(
-      sourceUrls.map(async (url) => {
-        const content = await fetchPageContent(url);
-        return { url, content };
-      })
-    );
-
-    // Build source content block for the prompt
-    const sourceBlock = fetchedContents
-      .map(({ url, content }, i) => {
-        const label = i === 0 ? "PRIMARY SOURCE (casino's own website)" : `SECONDARY SOURCE ${i}`;
-        return `=== ${label}: ${url} ===\n${content}\n`;
-      })
-      .join("\n");
+    const casinoContent = await fetchPageContent(casinoUrl);
 
     const userPrompt = `Write a 3,500-word SEO casino review for ${casino.name} targeting South African bettors in 2026.
 
-IMPORTANT: Base the ENTIRE review ONLY on the source content provided below. Do not use any external knowledge or invented figures. If information is not in the sources, do not include it or mark it as "not confirmed".
+IMPORTANT: Base the ENTIRE review ONLY on the casino website content provided below. Do not use any external knowledge, invented figures, or information from any other source. If something is not in the content below, do not include it.
 
 SA SEO KEYWORDS TO WEAVE IN NATURALLY:
 ${SA_KEYWORDS.map((k) => `- ${k}`).join("\n")}
 
 CRITICAL REMINDERS:
 - Exactly 3,500 words. Complete ALL sections. Do not stop early.
-- Every fact must come from the source content below.
-- Bonus wagering section MUST include a worked ZAR example (if bonus details are in sources).
-- Sports betting section MUST reference actual markets/sports found in sources.
-- Banking section MUST list only payment methods confirmed in sources.
-- Minimum 6 FAQ questions.
+- Only use facts confirmed in the source content below.
+- Never mention or reference any competing site, review site, or third-party platform.
+- Never include bonus or promo codes not explicitly stated on the casino's own site.
+- Minimum 6 FAQ questions based only on sourced facts.
 
---- SOURCE CONTENT START ---
+--- CASINO WEBSITE CONTENT (${casinoUrl}) ---
 
-${sourceBlock}
+${casinoContent}
 
---- SOURCE CONTENT END ---`;
+--- END OF SOURCE CONTENT ---`;
 
     const stream = client.messages.stream({
       model: "claude-sonnet-4-5",
