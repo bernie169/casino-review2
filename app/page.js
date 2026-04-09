@@ -75,7 +75,7 @@ export default function Home() {
 
       if (!res.ok) {
         const err = await res.json();
-        addLog(err.error || `Server error ${res.status}`, "error");
+        addLog(err.error || `Server error ${res.}`, "error");
         setBusy(false);
         return;
       }
@@ -98,20 +98,30 @@ export default function Home() {
           try {
             const event = JSON.parse(line.slice(6));
 
-            if (event.type === "status") {
+           if (event.type === "chunk") {
+              setMarkdown(prev => {
+                const updated = prev + event.text;
+                const wc = updated.trim().split(/\s+/).length;
+                setWordCount(wc);
+                return updated;
+              });
+              setProgress(p => Math.min(p + 0.3, 95));
+            } else if (event.type === "status") {
               addLog(event.text, "status");
               setProgress(p => Math.min(p + 10, 85));
             } else if (event.type === "search") {
               addLog(`🔍 ${event.text}`, "search");
               setProgress(p => Math.min(p + 5, 85));
             } else if (event.type === "done") {
-              const wc = event.text.trim().split(/\s+/).length;
-              setMarkdown(event.text.trim());
-              setWordCount(wc);
               setProgress(100);
-              addLog(`✅ Done — ${wc.toLocaleString()} words`, "done");
+              setMarkdown(prev => {
+                const wc = prev.trim().split(/\s+/).length;
+                addLog(`✅ Done — ${wc.toLocaleString()} words`, "done");
+                setWordCount(wc);
+                return prev;
+              });
             } else if (event.type === "error") {
-              addLog(`❌ ${event.text}`, "error");
+              addLog(`❌ ${event.message || event.text}`, "error");
             }
           } catch {}
         }
