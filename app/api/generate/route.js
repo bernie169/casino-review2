@@ -4,179 +4,61 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-const SYSTEM_PROMPT = `You are an elite SEO content strategist and casino review expert for the South African online gambling market. You write for Novus Media.
+const SYSTEM_PROMPT = `You are an elite SEO content strategist and casino review expert for the South African online gambling market. You write for Novus Media, publishing on Kickoff.com.
 
-Write a CONCISE but comprehensive 3,500-word SEO-optimised casino review in Markdown. Target exactly 3,500 words. Do not pad. Every sentence must add value. Complete all sections fully before stopping.
+Your job is two phases:
 
-CRITICAL ACCURACY RULES — NON-NEGOTIABLE:
-1. ONLY use facts, figures, and details from the casino website content provided below. Nothing else.
-2. Do NOT invent figures, game counts, RTP percentages, or bonus amounts. If not in the source content, say "not specified" or omit.
-3. NEVER reference, mention, or link to any competing casino, betting site, review site, or third-party source. The only site referenced in the review is the casino being reviewed.
-4. NEVER include bonus codes, promo codes, or promotional offers not found in the provided casino content.
-5. NEVER mention goal.com, onlinemobileslots.com, or any other external site anywhere in the review.
-6. If a fact cannot be confirmed from the provided content, do not include it.
+PHASE 1 — RESEARCH: Use web search to gather comprehensive, current, accurate information about the casino. Search for:
+- The casino's official SA site for current bonuses, promotions, T&Cs, payment methods, game counts
+- "[Casino name] review South Africa" for player experience insights
+- "[Casino name] slots games South Africa" for game library details
+- "[Casino name] sports betting South Africa" for betting markets, odds, features
+- "[Casino name] mobile app South Africa" for mobile experience
+- "[Casino name] withdrawal South Africa" for banking details
+- "[Casino name] licence South Africa" for licensing and safety info
+- "[Casino name] VIP loyalty South Africa" for loyalty programme details
+Search as many times as needed to build a complete picture. Prioritise the casino's own official pages.
+
+PHASE 2 — WRITE: Using everything you've researched, write a factual, informative, reader-first 3,500-word review. 
 
 WRITING RULES:
-1. Use H2 headings phrased as questions matching user search intent (e.g. "What Welcome Bonus Does Easybet Offer?"). H3s are clean navigational labels.
-2. Open with: <!-- SEO META: Focus Keyphrase | Meta Description max 155 chars | Suggested Slug -->
-3. All currency in ZAR (R). All odds in decimal format.
-4. Humanised, authoritative tone for South African bettors — no puffery, no rule-of-three lists, no em dashes.
-5. End with a responsible gambling section.
+1. Be specific and informative — use actual numbers, actual game titles, actual bonus amounts, actual payment methods found in your research. Never be vague.
+2. NEVER mention or reference any review site, competitor site, or third party in the output. Present all facts as verified information about the casino.
+3. NEVER name specific competing casinos in the review.
+4. Only include bonus codes if found on the casino's own official website.
+5. Use H2 headings phrased as questions matching user search intent. H3s are clean navigational labels.
+6. All currency in ZAR (R). All odds in decimal format.
+7. Humanised, authoritative tone — no puffery, no rule-of-three lists, no em dashes.
+8. Never tell the reader to "visit the site to confirm" or "check the website for details" — if you don't know something, omit it.
+9. Complete all sections fully. Do not stop early.
 
-REQUIRED SECTIONS — complete every section, do not cut off mid-review:
+REQUIRED SECTIONS:
+<!-- SEO META: Focus Keyphrase | Meta Description max 155 chars | Suggested Slug -->
+---
+title: "[Casino] Review South Africa 2026"
+description: "..."
+tags: [online casino, South Africa, sports betting, ZAR]
+canonical: "/reviews/[slug]"
+---
 
-# [Casino] Review South Africa 2026
+# [Casino] Review South Africa 2026 – Is It Worth Your Rands?
 ## Quick Verdict
 ## What Welcome Bonus Does [Casino] Offer South African Players?
-## How Does [Casino] Sports Betting Work?
-## What Casino Games Are Available on [Casino]?
+## How Does [Casino]'s Sports Betting Work?
+## What Casino Games Can You Play at [Casino]?
 ## How Do You Deposit and Withdraw at [Casino]?
-## How Do You Register an Account at [Casino]?
+## How Do You Register at [Casino]?
 ## What Is the [Casino] Mobile Experience Like?
 ## Does [Casino] Have a VIP or Loyalty Programme?
-## How Does [Casino] Stack Up for South African Players?
+## How Does [Casino] Stack Up for SA Players?
 ## Is [Casino] Safe and Legal in South Africa?
-## How Good Is [Casino] Customer Support?
+## How Good Is [Casino]'s Customer Support?
 ## Pros and Cons
 ## Final Verdict
 ## Frequently Asked Questions
 ## Responsible Gambling
 
-SEO: 1.5-2% keyword density, LSI keywords throughout, internal links as [INTERNAL LINK: topic], YAML front matter at top.`;
-
-const SA_KEYWORDS = [
-  "best online casino South Africa",
-  "SA sports betting",
-  "casino bonuses South Africa",
-  "online betting ZAR",
-  "mobile casino South Africa",
-  "FICA verified casino SA",
-  "South African betting sites",
-  "casino deposit methods South Africa",
-  "sports betting South Africa 2026",
-  "online gambling South Africa legal",
-  "PSL betting",
-  "Springboks betting odds",
-];
-
-// Subpage slugs most likely to contain useful review content
-const PRIORITY_SLUGS = [
-  "/promotions", "/bonus", "/welcome-bonus", "/offers",
-  "/casino", "/slots", "/live-casino", "/games",
-  "/sport", "/sports", "/sports-betting", "/soccer", "/football",
-  "/banking", "/deposits", "/withdrawals", "/payments",
-  "/mobile", "/app", "/mobile-app",
-  "/about", "/about-us", "/responsible-gambling", "/licensing",
-  "/vip", "/loyalty", "/rewards",
-  "/register", "/sign-up", "/contact", "/support", "/help",
-];
-
-async function fetchPage(url) {
-  try {
-    const res = await fetch(url, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-        "Accept-Language": "en-ZA,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
-    if (!res.ok) return null;
-    const html = await res.text();
-    const text = html
-      .replace(/<script[\s\S]*?<\/script>/gi, "")
-      .replace(/<style[\s\S]*?<\/style>/gi, "")
-      .replace(/<[^>]+>/g, " ")
-      .replace(/\s+/g, " ")
-      .trim();
-    return text.length > 100 ? text.slice(0, 5000) : null;
-  } catch {
-    return null;
-  }
-}
-
-function extractInternalLinks(html, baseUrl) {
-  const links = new Set();
-  const hrefRegex = /href=["']([^"']+)["']/gi;
-  let match;
-  while ((match = hrefRegex.exec(html)) !== null) {
-    const href = match[1];
-    try {
-      const url = new URL(href, baseUrl);
-      if (url.hostname === new URL(baseUrl).hostname && url.pathname !== "/") {
-        links.add(url.pathname);
-      }
-    } catch {}
-  }
-  return [...links];
-}
-
-async function scrapesite(domain) {
-  const baseUrl = `https://${domain}`;
-  const pages = {};
-
-  // Fetch homepage and extract links
-  let homepageHtml = "";
-  try {
-    const res = await fetch(baseUrl, {
-      headers: {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml",
-        "Accept-Language": "en-ZA,en;q=0.9",
-      },
-      signal: AbortSignal.timeout(10000),
-    });
-    if (res.ok) {
-      homepageHtml = await res.text();
-      const text = homepageHtml
-        .replace(/<script[\s\S]*?<\/script>/gi, "")
-        .replace(/<style[\s\S]*?<\/style>/gi, "")
-        .replace(/<[^>]+>/g, " ")
-        .replace(/\s+/g, " ")
-        .trim();
-      if (text.length > 100) pages["homepage"] = text.slice(0, 5000);
-    }
-  } catch {}
-
-  // Extract internal links from homepage
-  const internalLinks = extractInternalLinks(homepageHtml, baseUrl);
-
-  // Score links by how many priority slugs they match
-  const scoredLinks = internalLinks.map(path => {
-    const score = PRIORITY_SLUGS.filter(slug =>
-      path.toLowerCase().includes(slug.replace("/", ""))
-    ).length;
-    return { path, score };
-  }).filter(l => l.score > 0).sort((a, b) => b.score - a.score);
-
-  // Also try all priority slugs directly
-  const directSlugs = PRIORITY_SLUGS.map(slug => ({ path: slug, score: 1 }));
-
-  // Combine, deduplicate, take top 15
-  const allPaths = [...scoredLinks, ...directSlugs];
-  const seen = new Set();
-  const toFetch = [];
-  for (const { path } of allPaths) {
-    if (!seen.has(path) && toFetch.length < 15) {
-      seen.add(path);
-      toFetch.push(path);
-    }
-  }
-
-  // Fetch all subpages in parallel
-  const results = await Promise.all(
-    toFetch.map(async (path) => {
-      const content = await fetchPage(`${baseUrl}${path}`);
-      return { path, content };
-    })
-  );
-
-  for (const { path, content } of results) {
-    if (content) pages[path] = content;
-  }
-
-  return pages;
-}
+SEO: 1.5-2% primary keyword density, LSI keywords throughout, internal links as [INTERNAL LINK: topic].`;
 
 export async function POST(req) {
   try {
@@ -185,39 +67,33 @@ export async function POST(req) {
       return Response.json({ error: "Missing casino name or domain" }, { status: 400 });
     }
 
-    // Scrape all relevant pages from the casino site
-    const pages = await scrapesite(casino.domain);
-    const pageCount = Object.keys(pages).length;
+    const userPrompt = `Research and write a comprehensive 3,500-word SEO casino review for ${casino.name} (${casino.domain}) targeting South African bettors in 2026.
 
-    // Build content block
-    const contentBlock = Object.entries(pages)
-      .map(([path, content]) => `=== PAGE: ${path} ===\n${content}`)
-      .join("\n\n");
+Start by searching for current, accurate information about ${casino.name} across multiple searches. Cover:
+- Current welcome bonus and all promotions (exact amounts, wagering requirements, T&Cs)
+- Full sports betting offering (sports covered, PSL markets, live betting, cash-out, bet builder)
+- Casino game library (total count, providers, popular slots with RTPs, live casino)
+- All payment methods (each one individually with limits, fees, processing times)
+- Mobile app or mobile web experience (app store ratings if available)
+- VIP and loyalty programme details
+- Licensing, safety, responsible gambling tools
+- Customer support channels and hours
+- Step-by-step registration process
 
-    const userPrompt = `Write a 3,500-word SEO casino review for ${casino.name} (${casino.domain}) targeting South African bettors in 2026.
+Then write the full 3,500-word review using what you find. Be specific — use real numbers, real game names, real bonus amounts. Never vague. Never tell the reader to check the site themselves.
 
-IMPORTANT: Base the ENTIRE review ONLY on the casino website content provided below (scraped from ${pageCount} pages of ${casino.domain}). Do not use any external knowledge or invented figures. If something is not in the content below, do not include it.
-
-SA SEO KEYWORDS TO WEAVE IN NATURALLY:
-${SA_KEYWORDS.map((k) => `- ${k}`).join("\n")}
-
-CRITICAL REMINDERS:
-- Exactly 3,500 words. Complete ALL sections. Do not stop early.
-- Only use facts confirmed in the source content below.
-- Never mention or reference any competing site, review site, or third-party platform.
-- Never include bonus or promo codes not found in the content below.
-- Minimum 6 FAQ questions based only on sourced facts.
-
---- CASINO WEBSITE CONTENT (${pageCount} pages scraped from ${casino.domain}) ---
-
-${contentBlock}
-
---- END OF SOURCE CONTENT ---`;
+CRITICAL:
+- Exactly 3,500 words
+- Complete ALL required sections
+- Never reference any review site or competing casino by name in the output
+- Never include promo codes not found on ${casino.domain} itself
+- South African bettors are your audience — PSL, Springboks, Proteas, ZAR always`;
 
     const stream = client.messages.stream({
       model: "claude-sonnet-4-5",
       max_tokens: 16000,
       system: SYSTEM_PROMPT,
+      tools: [{ type: "web_search_20250305", name: "web_search" }],
       messages: [{ role: "user", content: userPrompt }],
     });
 
