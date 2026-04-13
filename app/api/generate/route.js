@@ -90,7 +90,7 @@ CRITICAL:
 - South African bettors are your audience — PSL, Springboks, Proteas, ZAR always`;
 
     const stream = client.messages.stream({
-      model: "claude-sonnet-4-5",
+      model: "claude-haiku-4-5",
       max_tokens: 16000,
       system: SYSTEM_PROMPT,
       tools: [{ type: "web_search_20250305", name: "web_search" }],
